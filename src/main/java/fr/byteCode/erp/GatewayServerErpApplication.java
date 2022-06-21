@@ -22,7 +22,16 @@ public class GatewayServerErpApplication {
     @Bean
     RouteLocator routes(RouteLocatorBuilder builder) {
         return builder.routes()
-                .route(r -> r.path("/api/user**")
+                .route(r -> r.path("/login")
+                        .filters(
+                                f->f
+                                        //cercuit breaker
+                                        .hystrix(h->h.setName("login")
+                                        )
+                        )
+                        .uri("http://localhost:8081/login")
+                        .id("r1"))
+                .route(r -> r.path("/**")
                         .filters(
                                 f->f
                                         //cercuit breaker
@@ -30,16 +39,7 @@ public class GatewayServerErpApplication {
                                         )
                         )
                         .uri("lb://erp-monolithique")
-                        .id("r1"))
-                .route(r -> r.path("/api/group**")
-                        .filters(
-                                f->f
-                                        //cercuit breaker
-                                        .hystrix(h->h.setName("api")
-                                        )
-                        )
-                        .uri("lb://erp-monolithique")
-                        .id("r1"))
+                        .id("r2"))
                 .build();
     }
     }
